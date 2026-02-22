@@ -2,7 +2,8 @@ import chokidar from 'chokidar';
 import { readFile } from 'fs/promises';
 import { existsSync } from 'fs';
 import { join } from 'path';
-import { addMatchFromLog } from './store.js';
+import { addMatchFromLog, updateCollectionFromLog } from './store.js';
+import { getStandardCards } from './scryfall.js';
 
 // MTG Arena log file location
 const LOG_PATH = join(
@@ -54,6 +55,19 @@ const PATTERNS = {
     // Event/format
     eventJoin: /"EventName":\s*"([^"]+)"/,
 };
+
+// Map of Arena ID -> Card Name
+let arenaIdToName = null;
+
+async function getArenaIdMap() {
+    if (arenaIdToName) return arenaIdToName;
+    const cards = await getStandardCards();
+    arenaIdToName = {};
+    for (const c of cards) {
+        if (c.arena_id) arenaIdToName[c.arena_id] = c.name.toLowerCase();
+    }
+    return arenaIdToName;
+}
 
 function detectFormat(eventName) {
     if (!eventName) return 'standard';
@@ -141,6 +155,41 @@ async function parseLogChunk(chunk) {
                 // Not valid JSON on this line
             }
         }
+
+        // Detect collection updates
+        if (line.includes('PlayerInventory.GetPlayerCardsV3') || line.includes('PlayerInventory.GetPlayerInventory')) {
+            try {
+                const jsonStart = line.indexOf('{');
+                if (jsonStart !== -1) {
+                    const obj = JSON.parse(line.slice(jsonStart));
+                    const payload = obj.payload || obj;
+
+                    let idQtyMap = null;
+
+                    if (payload['PlayerInventory.GetPlayerCardsV3']) {
+                        idQtyMap = payload['PlayerInventory.GetPlayerCardsV3'];
+                    } else if (payload['PlayerInventory.GetPlayerInventory']) {
+                        // Delta updates
+                        // e.g. {"Updates":[{"delta":[{"GrpId":68245,"Quantity":4}]}]}
+                        // Since this isn't a full sync, we leave it for now or implement if needed
+                    }
+
+                    if (idQtyMap && typeof idQtyMap === 'object') {
+                        const map = await getArenaIdMap();
+                        const newCollection = {};
+                        for (const [id, qty] of Object.entries(idQtyMap)) {
+                            const name = map[id];
+                            if (name) newCollection[name] = (newCollection[name] || 0) + parseInt(qty);
+                        }
+                        if (Object.keys(newCollection).length > 0) {
+                            await updateCollectionFromLog(newCollection);
+                        }
+                    }
+                }
+            } catch {
+                // skip
+            }
+        }
     }
 }
 
@@ -171,9 +220,13 @@ export function initLogWatcher() {
     logStatus.watching = true;
     console.log(`👁️  Watching Arena log: ${LOG_PATH}`);
 
-    // Read existing content to set position (don't parse old history)
+    // Read existing content to set position AND parse any existing collection snapshots
     readFile(LOG_PATH, 'utf-8')
-        .then(content => { filePosition = content.length; })
+        .then(content => {
+            filePosition = content.length;
+            // Do a quick one-time scan of the file to pull the latest GetPlayerCardsV3
+            parseLogChunk(content).catch(() => { });
+        })
         .catch(() => { });
 
     const watcher = chokidar.watch(LOG_PATH, {

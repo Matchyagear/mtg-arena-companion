@@ -81,7 +81,7 @@ async function fetchAllStandardCards() {
     return cards;
 }
 
-async function getStandardCards() {
+export async function getStandardCards() {
     const cached = await loadCache();
     if (cached) return cached;
     return fetchAllStandardCards();

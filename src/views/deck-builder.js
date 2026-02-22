@@ -501,7 +501,7 @@ function openCollectionModal() {
     <div class="modal" role="dialog" aria-labelledby="coll-title">
       <div class="modal-title" id="coll-title">Manage Collection</div>
       <p style="font-size:13px;color:var(--text-secondary);margin-bottom:12px">
-        Paste your MTG Arena collection export here (Options → Account → View Account → Export Collection)
+        Since MTG Arena removed native collection exports, you will need to use a third-party memory scanner (like MTG Arena Tool or Untapped) to export your collection to a text file. Paste that list here:
       </p>
       <textarea id="coll-text" class="textarea" style="height:200px;resize:vertical" placeholder="4 Delver of Secrets (MID) 47&#10;..."></textarea>
       <div class="modal-actions">

@@ -55,6 +55,13 @@ async function saveCollection() {
     await writeFile(COLLECTION_FILE, JSON.stringify(collection, null, 2));
 }
 
+export async function updateCollectionFromLog(newCollection) {
+    if (Object.keys(newCollection).length === 0) return;
+    collection = newCollection;
+    await saveCollection();
+    console.log(`🗃️ Auto-synced collection: ${Object.keys(collection).length} cards`);
+}
+
 // ─── DECK ENDPOINTS ──────────────────────────────────────────────────────────
 
 // GET /api/decks
