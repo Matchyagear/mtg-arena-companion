@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MTG Arena Companion — Deck Builder & Match Tracker</title>
+  <meta name="description"
+    content="A personal companion app for MTG Arena. Build and analyze decks, track match results, and see your performance stats." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Cinzel+Decorative:wght@700;900&family=Inter:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+
+<body>
+  <div id="app">
+    <header class="app-header">
+      <div class="header-logo">
+        <span class="logo-gem">◆</span>
+        <span class="logo-text">MTG Companion</span>
+      </div>
+      <nav class="app-nav" role="navigation" aria-label="Main navigation">
+        <button id="nav-home" class="nav-btn active" data-view="home">
+          <span class="nav-icon">🏠</span>
+          <span>Home</span>
+        </button>
+        <button id="nav-deck-builder" class="nav-btn" data-view="deck-builder">
+          <span class="nav-icon">🃏</span>
+          <span>Deck Builder</span>
+        </button>
+        <button id="nav-match-tracker" class="nav-btn" data-view="match-tracker">
+          <span class="nav-icon">🎮</span>
+          <span>Match Tracker</span>
+        </button>
+        <button id="nav-stats" class="nav-btn" data-view="stats">
+          <span class="nav-icon">📊</span>
+          <span>Statistics</span>
+        </button>
+        <button id="nav-meta" class="nav-btn" data-view="meta">
+          <span class="nav-icon">📈</span>
+          <span>Meta</span>
+        </button>
+      </nav>
+      <div class="header-status">
+        <div id="log-status-dot" class="status-dot status-unknown" title="Arena log connection status"></div>
+        <span id="log-status-text" class="status-text">Arena</span>
+      </div>
+    </header>
+
+    <main id="main-content" class="app-main">
+      <!-- Views rendered by JS -->
+    </main>
+  </div>
+
+  <!-- Card preview tooltip -->
+  <div id="card-preview" class="card-preview-tooltip" aria-hidden="true">
+    <img id="card-preview-img" src="" alt="Card preview" />
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+
+</html>
