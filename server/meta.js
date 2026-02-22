@@ -188,9 +188,28 @@ const META_SNAPSHOT = {
     },
 };
 
-// GET /api/meta  — returns full meta snapshot
-router.get('/', (req, res) => {
-    res.json(META_SNAPSHOT);
+import { readFile } from 'fs/promises';
+import { scrapeStandardMeta, LIVE_META_FILE } from './scraper.js';
+
+// GET /api/meta  — returns live meta snapshot from file or default
+router.get('/', async (req, res) => {
+    try {
+        const data = await readFile(LIVE_META_FILE, 'utf-8');
+        res.json(JSON.parse(data));
+    } catch (e) {
+        // Fallback or send the initial hard-coded data
+        res.json(META_SNAPSHOT);
+    }
+});
+
+// POST /api/meta/refresh - scrape immediately
+router.post('/refresh', async (req, res) => {
+    try {
+        const meta = await scrapeStandardMeta();
+        res.json({ success: true, meta });
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to scrape meta' });
+    }
 });
 
 export default router;

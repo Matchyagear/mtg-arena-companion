@@ -39,6 +39,7 @@ export const api = {
 
     // Meta
     getMeta: () => req('/meta'),
+    refreshMeta: () => req('/meta/refresh', { method: 'POST' }),
 
     // Collection
     getCollection: () => req('/collection'),

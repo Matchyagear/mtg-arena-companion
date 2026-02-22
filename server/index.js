@@ -30,9 +30,16 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', time: new Date().toISOString() });
 });
 
+import { existsSync } from 'fs';
+import { scrapeStandardMeta, LIVE_META_FILE } from './scraper.js';
+
 // Initialize store and start log watcher
 await initStore();
 initLogWatcher();
+
+if (!existsSync(LIVE_META_FILE)) {
+    scrapeStandardMeta().catch(err => console.error('Failed initial meta scrape:', err));
+}
 
 const server = createServer(app);
 server.listen(PORT, () => {
