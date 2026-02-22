@@ -11,6 +11,7 @@ data/collection.json
 
 # Card cache — large auto-generated file, not needed in repo
 data/card-cache.json
+data/live-meta.json
 
 # Keep the data directory itself
 !data/.gitkeep
