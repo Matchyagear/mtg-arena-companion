@@ -7,6 +7,7 @@ dist/
 # Data files — personal match history & decks (don't commit private data)
 data/decks.json
 data/matches.json
+data/collection.json
 
 # Card cache — large auto-generated file, not needed in repo
 data/card-cache.json

@@ -2811,3 +2811,71 @@ canvas.chart-canvas {
     font-size: 12px;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/* COLLECTION TRACKER                                                          */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+.toggle-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggle-input {
+  display: none;
+}
+
+.toggle-slider {
+  width: 32px;
+  height: 18px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: 99px;
+  position: relative;
+  transition: all var(--t-fast);
+}
+
+.toggle-slider::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  background: var(--text-muted);
+  border-radius: 50%;
+  transition: all var(--t-fast);
+}
+
+.toggle-input:checked+.toggle-slider {
+  background: rgba(200, 155, 60, 0.15);
+  border-color: rgba(200, 155, 60, 0.4);
+}
+
+.toggle-input:checked+.toggle-slider::after {
+  left: 16px;
+  background: var(--gold-bright);
+  box-shadow: 0 0 8px var(--gold);
+}
+
+.toggle-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.card-item-owned {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--gold-bright);
+  background: rgba(200, 155, 60, 0.15);
+  padding: 1px 6px;
+  border-radius: 4px;
+  margin-left: 6px;
+  border: 1px solid rgba(200, 155, 60, 0.25);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}

@@ -10,9 +10,11 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = join(__dirname, '../data');
 const DECKS_FILE = join(DATA_DIR, 'decks.json');
 const MATCHES_FILE = join(DATA_DIR, 'matches.json');
+const COLLECTION_FILE = join(DATA_DIR, 'collection.json');
 
 let decks = [];
 let matches = [];
+let collection = {};
 
 export async function initStore() {
     if (!existsSync(DATA_DIR)) {
@@ -32,6 +34,13 @@ export async function initStore() {
         matches = [];
         await saveMatches();
     }
+    try {
+        collection = JSON.parse(await readFile(COLLECTION_FILE, 'utf-8'));
+        console.log(`🗃️ Loaded collection: ${Object.keys(collection).length} cards`);
+    } catch {
+        collection = {};
+        await saveCollection();
+    }
 }
 
 async function saveDecks() {
@@ -40,6 +49,10 @@ async function saveDecks() {
 
 async function saveMatches() {
     await writeFile(MATCHES_FILE, JSON.stringify(matches, null, 2));
+}
+
+async function saveCollection() {
+    await writeFile(COLLECTION_FILE, JSON.stringify(collection, null, 2));
 }
 
 // ─── DECK ENDPOINTS ──────────────────────────────────────────────────────────
@@ -214,5 +227,48 @@ export async function addMatchFromLog(matchData) {
     await saveMatches();
     return match;
 }
+
+// ─── COLLECTION ENDPOINTS ──────────────────────────────────────────────────
+
+// GET /api/collection
+router.get('/collection', (req, res) => {
+    res.json(collection);
+});
+
+// POST /api/collection
+router.post('/collection', async (req, res) => {
+    const { text } = req.body;
+    if (!text) return res.status(400).json({ error: 'Collection text is required' });
+
+    const lines = text.trim().split('\n');
+    const newCollection = {};
+
+    for (const line of lines) {
+        // Match: Qty Name (SET) CollectorNum
+        // Example: 4 Delver of Secrets (MID) 47
+        const match = line.trim().match(/^(\d+)\s+(.+?)(?:\s+\(| \d+$)/);
+        if (match) {
+            const qty = parseInt(match[1]);
+            const name = match[2].trim().toLowerCase();
+            newCollection[name] = (newCollection[name] || 0) + qty;
+        } else {
+            // Fallback for just "Qty Name"
+            const simpleMatch = line.trim().match(/^(\d+)\s+(.+)$/);
+            if (simpleMatch) {
+                const qty = parseInt(simpleMatch[1]);
+                const name = simpleMatch[2].trim().toLowerCase();
+                newCollection[name] = (newCollection[name] || 0) + qty;
+            }
+        }
+    }
+
+    if (Object.keys(newCollection).length === 0) {
+        return res.status(400).json({ error: 'No valid cards found in text' });
+    }
+
+    collection = newCollection;
+    await saveCollection();
+    res.json({ success: true, count: Object.keys(collection).length });
+});
 
 export default router;
